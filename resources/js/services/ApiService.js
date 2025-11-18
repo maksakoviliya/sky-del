@@ -3,12 +3,12 @@ import store from "../store";
 
 export const authClient = axios.create({
     baseURL: process.env.MIX_API_URL,
-    withCredentials: true, // required to handle the CSRF token
+    withCredentials: true,
+    headers: {
+        'Accept': 'application/json'
+    }
 });
 
-/*
- * Add a response interceptor
- */
 authClient.interceptors.response.use(
     (response) => {
         return response;

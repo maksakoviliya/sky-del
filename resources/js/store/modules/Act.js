@@ -29,13 +29,14 @@ export const mutations = {
 
 export const actions = {
     async fetchActs({commit}) {
-        commit("SET_LOADING", true, { root: true });
         try {
+            commit("SET_LOADING", true, { root: true });
             let response = await ApiService.fetchActs(router.currentRoute.value.query);
             commit("SET_ACTS", response.data.data)
             commit("SET_ACTS_META", response.data.meta);
             return response.data.data;
         } catch (error) {
+            console.log("error", error)
             commit("SET_ERROR", getError(error), { root: true });
             throw error
         } finally {
@@ -43,8 +44,8 @@ export const actions = {
         }
     },
     async createAct({commit}, params) {
-        commit("SET_LOADING", true, { root: true });
         try {
+            commit("SET_LOADING", true, { root: true });
             let response = await ApiService.createAct(params);
             return response.data.data;
         } catch (error) {

@@ -9,58 +9,59 @@ use App\Models\Order;
 use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 
 class ActController extends Controller
 {
-    public function index(Request $request)
-    {
-        $user = $request->user();
-        if ($user->isAdmin()) {
-            $acts = Act::whereHas('client')->paginate(10);
-        } else {
-            $acts = Act::whereHas('client')->where('user_id', $user->id)->paginate(10);
-        }
-        return ActResource::collection($acts);
-    }
+	public function index(Request $request): AnonymousResourceCollection
+	{
+		$user = $request->user();
+		$acts = Act::query()->whereHas('client');
+		if (!$user->isAdmin()) {
+			$acts = $acts->where('user_id', $user->id);
+		}
 
-    public function store(Request $request)
-    {
-        $request->validate([
-            'acts' => 'required|array'
-        ]);
+		return ActResource::collection($acts->paginate(10));
+	}
 
-        $act = Act::create([
-            'user_id' => Auth::user()->id
-        ]);
+	public function store(Request $request)
+	{
+		$request->validate([
+			'acts' => 'required|array'
+		]);
 
-        Order::whereIn('id', $request->input('acts'))->update([
-            'act_id' => $act->id
-        ]);
+		$act = Act::create([
+			'user_id' => Auth::user()->id
+		]);
 
-        return response()->json(['success']);
-    }
+		Order::whereIn('id', $request->input('acts'))->update([
+			'act_id' => $act->id
+		]);
 
-    public function destroy(Act $act)
-    {
-        Order::where('act_id', $act->id)->update([
-            'act_id' => null
-        ]);
+		return response()->json(['success']);
+	}
 
-        return $act->delete();
-    }
+	public function destroy(Act $act)
+	{
+		Order::where('act_id', $act->id)->update([
+			'act_id' => null
+		]);
 
-    public function download(Act $act)
-    {
-        $data = [
-            'title' => 'Акт приема-передачи товаров',
-            'date' => Carbon::now()->translatedFormat('\"d\" F Y'),
-            'act' => new ActResource($act),
-        ];
+		return $act->delete();
+	}
 
-        $pdf = PDF::loadView('pdf.act', $data);
+	public function download(Act $act)
+	{
+		$data = [
+			'title' => 'Акт приема-передачи товаров',
+			'date' => Carbon::now()->translatedFormat('\"d\" F Y'),
+			'act' => new ActResource($act),
+		];
 
-        return $pdf->download('act_' . $act->id . '_' . $act->created_at->format('d.m.Y') . '.pdf');
-    }
+		$pdf = PDF::loadView('pdf.act', $data);
+
+		return $pdf->download('act_' . $act->id . '_' . $act->created_at->format('d.m.Y') . '.pdf');
+	}
 }

@@ -40,7 +40,7 @@ import LogoLink from "../../components/common/LogoLink";
 import * as yup from "yup";
 
 export default {
-  name: "App",
+  name: "Login",
 
   components: {
     CommonInput,
