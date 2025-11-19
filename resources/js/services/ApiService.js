@@ -1,6 +1,5 @@
 import axios from "axios";
 import store from "../store";
-import {createRouterMatcher as Promise} from "vue-router";
 
 export const authClient = axios.create({
     baseURL: process.env.MIX_API_URL,
