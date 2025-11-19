@@ -1,5 +1,7 @@
 import ApiService from "../../services/ApiService";
 import {getError} from "../../utils/helpers";
+import {notify} from "@kyvg/vue3-notification";
+
 
 export const namespaced = true;
 
@@ -50,6 +52,21 @@ export const actions = {
             // return response.data.data;
             return response.data;
         } catch (error) {
+            commit("SET_ERROR", getError(error), { root: true });
+        } finally {
+            commit("SET_LOADING", false, { root: true });
+        }
+    },
+    async exportOrders({commit}, params) {
+        commit("SET_LOADING", true, { root: true });
+        try {
+            return await ApiService.exportOrders(params);
+        } catch (error) {
+            notify({
+                type: 'error',
+                title: 'Ошибка',
+                text: getError(error)
+            });
             commit("SET_ERROR", getError(error), { root: true });
         } finally {
             commit("SET_LOADING", false, { root: true });

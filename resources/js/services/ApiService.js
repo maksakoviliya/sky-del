@@ -1,5 +1,6 @@
 import axios from "axios";
 import store from "../store";
+import {createRouterMatcher as Promise} from "vue-router";
 
 export const authClient = axios.create({
     baseURL: process.env.MIX_API_URL,
@@ -128,6 +129,11 @@ export default {
     },
     removeClient(id) {
         return authClient.delete(`/clients/${id}`);
+    },
+    exportOrders(params) {
+        return authClient.post('/clients/export-orders', params, {
+            responseType: 'blob'
+        });
     },
 
     // Couriers

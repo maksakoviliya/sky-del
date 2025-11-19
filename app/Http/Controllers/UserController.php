@@ -2,15 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\OrdersExport;
 use App\Http\Resources\UserResource;
 use App\Models\Company;
+use App\Models\Order;
 use App\Models\Tarif;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Maatwebsite\Excel\Facades\Excel;
 
 class UserController extends Controller
 {
@@ -21,7 +25,9 @@ class UserController extends Controller
      */
     public function index()
     {
-        return UserResource::collection(User::where('role_id', User::ROLE_CLIENT)->orderBy('created_at', 'desc')->get());
+        return UserResource::collection(
+            User::where('role_id', User::ROLE_CLIENT)->orderBy('created_at', 'desc')->get()
+        );
     }
 
     public function allClients()
@@ -182,5 +188,17 @@ class UserController extends Controller
     public function destroy(User $user)
     {
         return $user->delete();
+    }
+
+    public function exportOrders(Request $request)
+    {
+        $user = User::query()->find($request->input('client_id'));
+        $start = Carbon::parse($request->input('start'));
+        $finish = Carbon::parse($request->input('finish'));
+
+        return Excel::download(
+            new OrdersExport($user, $start, $finish),
+            sprintf("export_user_%s_%s_to_%s.xlsx", $user->id, $start->format('d_m_Y'), $finish->format('d_m_Y'))
+        );
     }
 }
