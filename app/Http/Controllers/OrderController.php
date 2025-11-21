@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Events\CourierAppointed;
+use App\Exports\OrdersExport;
 use App\Http\Resources\OrderCollection;
 use App\Http\Resources\OrderResource;
 use App\Models\Order;
@@ -13,6 +14,8 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Notification;
+use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class OrderController extends Controller
 {
@@ -216,5 +219,17 @@ class OrderController extends Controller
         ];
 
         return response()->json(['data' => $data]);
+    }
+
+    public function export(Request $request): BinaryFileResponse
+    {
+        $orders = Order::query()
+            ->whereIn('id', $request->input('orders'))
+            ->get();
+
+        return Excel::download(
+            new OrdersExport($orders),
+            "orders_export.xlsx"
+        );
     }
 }

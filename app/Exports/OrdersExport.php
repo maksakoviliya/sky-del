@@ -18,14 +18,9 @@ final class OrdersExport implements FromCollection, WithHeadings, WithMapping
 
     private int $rowNumber = 0;
 
-    public function __construct(User $user, CarbonInterface $start, CarbonInterface $finish)
+    public function __construct(\Illuminate\Database\Eloquent\Collection $orders)
     {
-        $this->orders = Order::query()
-            ->with('recipient')
-            ->where('user_id', $user->id)
-            ->whereBetween('created_at', [$start->startOfDay(), $finish->endOfDay()])
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $this->orders = $orders;
     }
 
     public function collection(): \Illuminate\Database\Eloquent\Collection|Collection

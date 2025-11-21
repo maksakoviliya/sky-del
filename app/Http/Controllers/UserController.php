@@ -10,18 +10,20 @@ use App\Models\Tarif;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class UserController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Resources\Json\AnonymousResourceCollection
+     * @return AnonymousResourceCollection
      */
     public function index()
     {
@@ -38,7 +40,7 @@ class UserController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param \Illuminate\Http\Request $request
+     * @param Request $request
      * @return UserResource
      */
     public function store(Request $request)
@@ -111,7 +113,7 @@ class UserController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param \Illuminate\Http\Request $request
+     * @param Request $request
      * @param int $id
      * @return UserResource
      */
@@ -190,14 +192,21 @@ class UserController extends Controller
         return $user->delete();
     }
 
-    public function exportOrders(Request $request)
+    public function exportOrders(Request $request): BinaryFileResponse
     {
         $user = User::query()->find($request->input('client_id'));
         $start = Carbon::parse($request->input('start'));
         $finish = Carbon::parse($request->input('finish'));
+		
+		$orders = Order::query()
+			->with('recipient')
+			->where('user_id', $user->id)
+			->whereBetween('created_at', [$start->startOfDay(), $finish->endOfDay()])
+			->orderBy('created_at', 'desc')
+			->get();
 
         return Excel::download(
-            new OrdersExport($user, $start, $finish),
+            new OrdersExport($orders),
             sprintf("export_user_%s_%s_to_%s.xlsx", $user->id, $start->format('d_m_Y'), $finish->format('d_m_Y'))
         );
     }

@@ -53,7 +53,7 @@ const onSubmit = async (values) => {
         <Form
             @submit="onSubmit"
             :validation-schema="schema"
-            v-slot="{ values, setFieldValue }"
+            v-slot="{ values }"
             :initial-values="data"
             class="flex items-end mt-10 gap-8">
 

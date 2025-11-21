@@ -134,6 +134,13 @@ export default {
             responseType: 'blob'
         });
     },
+    exportSelectedOrders(params) {
+        return authClient.post('/orders/export-selected-orders', {
+            orders: [...params]
+        }, {
+            responseType: 'blob'
+        });
+    },
 
     // Couriers
     fetchCouriers(params) {

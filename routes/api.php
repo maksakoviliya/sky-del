@@ -24,6 +24,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/recipientsForUser/{user}', [RecipientController::class, 'recipientsForUser'])->name('recipients.forUser');
 
     // Orders
+	Route::post('/orders/export-selected-orders', [OrderController::class, 'export'])
+		->middleware(['admin'])
+		->name('orders.export');
+	
     Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
     Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
     Route::post('/orders', [OrderController::class, 'store'])->name('orders.create');

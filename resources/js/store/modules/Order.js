@@ -164,9 +164,19 @@ export const actions = {
     async fetchOrdersAnalytics({commit}) {
         commit("SET_LOADING", true, { root: true });
         try {
-            console.log('asd')
             let response = await ApiService.fetchOrdersAnalytics();
             return response.data.data;
+        } catch (error) {
+            commit("SET_ERROR", getError(error), { root: true });
+            throw error
+        } finally {
+            commit("SET_LOADING", false, { root: true });
+        }
+    },
+    async exportOrders({commit}, orders) {
+        commit("SET_LOADING", true, { root: true });
+        try {
+            return await ApiService.exportSelectedOrders(orders.map((order) => order.id));
         } catch (error) {
             commit("SET_ERROR", getError(error), { root: true });
             throw error
