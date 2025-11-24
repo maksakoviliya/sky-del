@@ -57,11 +57,8 @@ final class OrdersExport implements FromCollection, WithHeadings, WithMapping
             sprintf("%d руб.", $row->assessed_value),
             sprintf("%d руб.", $row->price),
             sprintf("%d руб.", $row->price),
-            sprintf("%d руб.", $row->cod_price),
-            $row->cod ? 'Наличные' : match ($row->payment_type) {
-                'card' => 'Карта',
-                default => 'Наличные',
-            },
+            '',
+            $row->cod ? 'Наличные' : '',
         ];
     }
 }
